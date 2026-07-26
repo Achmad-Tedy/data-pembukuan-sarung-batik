@@ -1,0 +1,6 @@
+{
+  "name": "Pembukuan Sarung Batik Pasuruan",
+  "description": "Aplikasi pembukuan keuangan dan manajemen stok barang usaha sarung batik pasuruan dengan panel admin.",
+  "requestFramePermissions": [],
+  "majorCapabilities": ["MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"]
+}
