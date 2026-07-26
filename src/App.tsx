@@ -3,6 +3,7 @@ import { ProductItem, Transaction, PaymentMethod, ExpenseCategory, TransactionIt
 import { INITIAL_PRODUCTS, INITIAL_TRANSACTIONS } from './data/initialData';
 import { calculateMetrics, exportTransactionsToCSV } from './utils/formatters';
 import { Header } from './components/Header';
+import { SettingsModal } from './components/SettingsModal';
 import { StatCards } from './components/StatCards';
 import { InventoryManager } from './components/InventoryManager';
 import { NewSaleModal } from './components/NewSaleModal';
@@ -20,6 +21,15 @@ export default function App() {
   const [appName, setAppName] = useState(() => {
     return localStorage.getItem('batik_app_name') || 'Pembukuan Sarung Batik Pasuruan';
   });
+
+  const [logoUrl, setLogoUrl] = useState(() => {
+    return localStorage.getItem('batik_logo_url') || 'https://lh3.googleusercontent.com/d/14NRix0QJ1BuDB79624v8J2U4x_P-jaY4';
+  });
+  const [themeColor, setThemeColor] = useState(() => {
+    return localStorage.getItem('batik_theme_color') || 'blue';
+  });
+  const [isSettingsModalOpen, setIsSettingsModalOpen] = useState(false);
+
 
   // 1. Persistent State
   const [products, setProducts] = useState<ProductItem[]>([]);
@@ -48,6 +58,18 @@ export default function App() {
     return sessionStorage.getItem('batik_role') as 'admin' | 'cashier' | null;
   });
   const [loginError, setLoginError] = useState<string>('');
+
+  
+  const handleSaveSettings = (newAppName: string, newLogoUrl: string, newThemeColor: string) => {
+    setAppName(newAppName);
+    setLogoUrl(newLogoUrl);
+    setThemeColor(newThemeColor);
+    localStorage.setItem('batik_app_name', newAppName);
+    localStorage.setItem('batik_logo_url', newLogoUrl);
+    localStorage.setItem('batik_theme_color', newThemeColor);
+    setIsSettingsModalOpen(false);
+    showToast('Pengaturan tampilan berhasil disimpan', 'success');
+  };
 
   const handleLogin = (role: 'admin' | 'cashier', password?: string) => {
     if (role === 'admin') {
@@ -388,6 +410,9 @@ export default function App() {
 
       {/* App Header & Navigation */}
       <Header
+        logoUrl={logoUrl}
+        themeColor={themeColor}
+        onOpenSettings={() => setIsSettingsModalOpen(true)}
         appName={appName}
         userRole={userRole}
         onOpenSaleModal={() => setIsSaleModalOpen(true)}

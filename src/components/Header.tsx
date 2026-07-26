@@ -2,6 +2,9 @@ import React from 'react';
 import { ShoppingBag, PlusCircle, MinusCircle, PackagePlus, RefreshCw, Download, Sparkles, LogOut, Settings } from 'lucide-react';
 
 interface HeaderProps {
+  logoUrl: string;
+  themeColor: string;
+  onOpenSettings: () => void;
   appName: string;
   userRole: 'admin' | 'cashier' | null;
   onOpenSaleModal: () => void;
@@ -15,6 +18,9 @@ interface HeaderProps {
 }
 
 export const Header: React.FC<HeaderProps> = ({
+  logoUrl,
+  themeColor,
+  onOpenSettings,
   appName,
   userRole,
   onOpenSaleModal,
@@ -26,25 +32,66 @@ export const Header: React.FC<HeaderProps> = ({
   activeTab,
   setActiveTab,
 }) => {
+  
+  const themeClasses: Record<string, any> = {
+    blue: {
+      gradient: 'from-blue-600 via-blue-400 to-blue-500',
+      logoBg: 'from-blue-600 to-blue-800 border-blue-500/30',
+      badgeBg: 'bg-blue-600 border-blue-500/50',
+      tabActive: 'text-blue-400 border-blue-500'
+    },
+    emerald: {
+      gradient: 'from-emerald-600 via-emerald-400 to-emerald-500',
+      logoBg: 'from-emerald-600 to-emerald-800 border-emerald-500/30',
+      badgeBg: 'bg-emerald-600 border-emerald-500/50',
+      tabActive: 'text-emerald-400 border-emerald-500'
+    },
+    rose: {
+      gradient: 'from-rose-600 via-rose-400 to-rose-500',
+      logoBg: 'from-rose-600 to-rose-800 border-rose-500/30',
+      badgeBg: 'bg-rose-600 border-rose-500/50',
+      tabActive: 'text-rose-400 border-rose-500'
+    },
+    amber: {
+      gradient: 'from-amber-600 via-amber-400 to-amber-500',
+      logoBg: 'from-amber-600 to-amber-800 border-amber-500/30',
+      badgeBg: 'bg-amber-600 border-amber-500/50',
+      tabActive: 'text-amber-400 border-amber-500'
+    },
+    violet: {
+      gradient: 'from-violet-600 via-violet-400 to-violet-500',
+      logoBg: 'from-violet-600 to-violet-800 border-violet-500/30',
+      badgeBg: 'bg-violet-600 border-violet-500/50',
+      tabActive: 'text-violet-400 border-violet-500'
+    },
+    slate: {
+      gradient: 'from-slate-500 via-slate-400 to-slate-500',
+      logoBg: 'from-slate-600 to-slate-800 border-slate-500/30',
+      badgeBg: 'bg-slate-600 border-slate-500/50',
+      tabActive: 'text-slate-300 border-slate-400'
+    }
+  };
+  const theme = themeClasses[themeColor] || themeClasses['blue'];
+
   return (
     <header className="bg-slate-900 border-b border-slate-700/60 sticky top-0 z-30">
       {/* Decorative Top Accent Line */}
-      <div className="h-1.5 bg-gradient-to-r from-blue-600 via-blue-400 to-blue-500 w-full" />
+      <div className={`h-1.5 bg-gradient-to-r ${theme.gradient} w-full`} />
 
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-3.5">
         <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-4">
           
           {/* Brand & Title */}
           <div className="flex items-center space-x-3.5">
-            <div className="w-11 h-11 rounded-xl bg-gradient-to-br from-blue-600 to-blue-800 p-1 flex items-center justify-center shadow-md border border-blue-500/30 overflow-hidden">
-              <img src="https://lh3.googleusercontent.com/d/14NRix0QJ1BuDB79624v8J2U4x_P-jaY4" alt="Logo" className="w-full h-full object-cover" />
+            <div className={`w-11 h-11 rounded-xl bg-gradient-to-br ${theme.logoBg} p-1 flex items-center justify-center shadow-md border overflow-hidden`}>
+              <img src={logoUrl} alt="Logo" className="w-full h-full object-cover" />
             </div>
             <div>
               <div className="flex items-center space-x-2">
                 <h1 className="text-xl sm:text-2xl font-bold font-serif tracking-wide text-white">
                   {appName}
                 </h1>
-                <span className="bg-blue-600 text-white text-xs px-2.5 py-0.5 rounded-full border border-blue-500/50 font-medium capitalize">
+                <span className={`text-white text-xs px-2.5 py-0.5 rounded-full border font-medium capitalize ${theme.badgeBg}`}>
                   {userRole === 'admin' ? 'Bos' : userRole}
                 </span>
               </div>
@@ -72,6 +119,15 @@ export const Header: React.FC<HeaderProps> = ({
               <span>+ Pengeluaran</span>
             </button>
 
+            {userRole === 'admin' && (
+              <button
+                onClick={onOpenSettings}
+                title="Pengaturan Tampilan"
+                className="inline-flex items-center justify-center p-2 rounded-lg bg-slate-800 hover:bg-slate-700 text-slate-300 text-sm transition-all border border-slate-600 cursor-pointer ml-1"
+              >
+                <Settings className="w-4 h-4" />
+              </button>
+            )}
             <button
               onClick={onLogout}
               title="Keluar (Logout)"
@@ -88,7 +144,7 @@ export const Header: React.FC<HeaderProps> = ({
             onClick={() => setActiveTab('dashboard')}
             className={`px-4 py-2 rounded-t-lg font-medium transition-all cursor-pointer whitespace-nowrap ${
               activeTab === 'dashboard'
-                ? 'bg-slate-800 text-blue-400 border-b-2 border-blue-500 font-semibold'
+                ? `bg-slate-800 ${theme.tabActive} border-b-2 font-semibold`
                 : 'text-slate-400 hover:text-slate-200 hover:bg-slate-800/50'
             }`}
           >
@@ -98,7 +154,7 @@ export const Header: React.FC<HeaderProps> = ({
             onClick={() => setActiveTab('history')}
             className={`px-4 py-2 rounded-t-lg font-medium transition-all cursor-pointer whitespace-nowrap ${
               activeTab === 'history'
-                ? 'bg-slate-800 text-blue-400 border-b-2 border-blue-500 font-semibold'
+                ? `bg-slate-800 ${theme.tabActive} border-b-2 font-semibold`
                 : 'text-slate-400 hover:text-slate-200 hover:bg-slate-800/50'
             }`}
           >
@@ -108,7 +164,7 @@ export const Header: React.FC<HeaderProps> = ({
             onClick={() => setActiveTab('inventory')}
             className={`px-4 py-2 rounded-t-lg font-medium transition-all cursor-pointer whitespace-nowrap ${
               activeTab === 'inventory'
-                ? 'bg-slate-800 text-blue-400 border-b-2 border-blue-500 font-semibold'
+                ? `bg-slate-800 ${theme.tabActive} border-b-2 font-semibold`
                 : 'text-slate-400 hover:text-slate-200 hover:bg-slate-800/50'
             }`}
           >
@@ -118,7 +174,7 @@ export const Header: React.FC<HeaderProps> = ({
             onClick={() => setActiveTab('analytics')}
             className={`px-4 py-2 rounded-t-lg font-medium transition-all cursor-pointer whitespace-nowrap ${
               activeTab === 'analytics'
-                ? 'bg-slate-800 text-blue-400 border-b-2 border-blue-500 font-semibold'
+                ? `bg-slate-800 ${theme.tabActive} border-b-2 font-semibold`
                 : 'text-slate-400 hover:text-slate-200 hover:bg-slate-800/50'
             }`}
           >
@@ -129,7 +185,7 @@ export const Header: React.FC<HeaderProps> = ({
               onClick={() => setActiveTab('admin')}
               className={`px-4 py-2 rounded-t-lg font-medium transition-all cursor-pointer whitespace-nowrap flex items-center space-x-1 ${
                 activeTab === 'admin'
-                  ? 'bg-slate-800 text-blue-400 border-b-2 border-blue-500 font-semibold'
+                  ? `bg-slate-800 ${theme.tabActive} border-b-2 font-semibold`
                   : 'text-slate-400 hover:text-slate-200 hover:bg-slate-800/50'
               }`}
             >

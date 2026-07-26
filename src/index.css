@@ -1,1 +1,42 @@
 @import "tailwindcss";
+
+@media print {
+  body * {
+    visibility: hidden;
+  }
+  .fixed.inset-0 {
+    position: absolute;
+    left: 0;
+    top: 0;
+    margin: 0;
+    padding: 0;
+    background: transparent !important;
+  }
+  .max-w-sm {
+    max-width: 100% !important;
+    width: 100% !important;
+    box-shadow: none !important;
+    border: none !important;
+    margin: 0 !important;
+  }
+  /* Show only the printable receipt area */
+  .fixed.inset-0 .p-6, .fixed.inset-0 .p-6 * {
+    visibility: visible;
+  }
+  .fixed.inset-0 .p-6 {
+    position: absolute;
+    left: 0;
+    top: 0;
+    color: black !important;
+  }
+  .no-print {
+    display: none !important;
+  }
+  .text-amber-950, .text-slate-400, .text-slate-100, .text-slate-300 {
+    color: black !important;
+  }
+  .bg-blue-700 {
+    background: black !important;
+    color: white !important;
+  }
+}
