@@ -75,11 +75,7 @@ export const ReceiptModal: React.FC<ReceiptModalProps> = ({
               <h2 className="font-bold text-sm text-black">
                 {appName}
               </h2>
-              <p className="text-[10px] text-black leading-tight font-sans">
-                Jl.Dr.Ir.Soekarno No.19, Medokan<br />Semampir
-              </p>
-              <p className="text-[10px] text-black font-sans">No Telp 081234567890</p>
-              <p className="text-[10px] text-black font-sans">5120170609</p>
+              <p className="text-[10px] text-black leading-tight font-sans whitespace-pre-wrap">Pasuruan\n(085707437883 - 082336651163)</p>
             </div>
 
             <div className="border-t border-dashed border-gray-400"></div>
@@ -163,20 +159,15 @@ export const ReceiptModal: React.FC<ReceiptModalProps> = ({
 
             <div className="border-t border-dashed border-gray-400"></div>
 
+            
             {/* Footer message */}
             <div className="text-center pt-2 text-[10px] space-y-1">
               <p>Terimakasih telah berbelanja di<br/>Toko Kami</p>
-              
-              <div className="flex justify-center mt-3">
-                <div className="w-16 h-16 border-2 border-black p-0.5">
-                   <img src={`https://api.qrserver.com/v1/create-qr-code/?size=150x150&data=${transaction.invoiceNo}`} alt="QR" className="w-full h-full mix-blend-multiply" />
-                </div>
-              </div>
             </div>
-
           </div>
         </div>
       </div>
     </div>
   );
 };
+

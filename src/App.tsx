@@ -569,6 +569,17 @@ export default function App() {
 
       </main>
 
+      {/* Settings Modal */}
+      {isSettingsModalOpen && (
+        <SettingsModal
+          currentAppName={appName}
+          currentLogoUrl={logoUrl}
+          currentThemeColor={themeColor}
+          onSave={handleSaveSettings}
+          onClose={() => setIsSettingsModalOpen(false)}
+        />
+      )}
+
       {/* Modal 1: Input Sale (Pemasukan) */}
       <NewSaleModal
         isOpen={isSaleModalOpen}
