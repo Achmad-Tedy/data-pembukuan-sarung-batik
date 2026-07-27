@@ -1,199 +1,101 @@
-import { supabase } from './supabase';
 import { ProductItem, Transaction, TransactionItemDetail } from '../types';
+import { INITIAL_PRODUCTS, INITIAL_TRANSACTIONS } from '../data/initialData';
 
-export const fetchProducts = async (): Promise<ProductItem[]> => {
-  const { data, error } = await supabase.from('products').select('*').order('created_at', { ascending: false });
-  if (error) throw error;
-  
-  return data.map(p => ({
-    id: p.id,
-    sku: p.sku,
-    name: p.name,
-    category: p.category as any,
-    costPrice: p.cost_price,
-    sellingPrice: p.selling_price,
-    stock: p.stock,
-    minStockAlert: p.min_stock_alert,
-    variation: p.variation,
-    size: p.size,
-    description: p.description,
-    createdAt: p.created_at
-  }));
+// Local storage keys
+const PRODUCTS_KEY = 'batik_products';
+const TRANSACTIONS_KEY = 'batik_transactions';
+
+const getLocalData = <T>(key: string, initialData: T): T => {
+  try {
+    const item = localStorage.getItem(key);
+    return item ? JSON.parse(item) : initialData;
+  } catch (error) {
+    return initialData;
+  }
 };
 
-export const fetchTransactions = async (): Promise<Transaction[]> => {
-  const { data: txs, error: txError } = await supabase.from('transactions').select('*').order('date', { ascending: false });
-  if (txError) throw txError;
-  
-  const { data: items, error: itemsError } = await supabase.from('transaction_items').select('*, products(name, sku)');
-  if (itemsError) throw itemsError;
-  
-  return txs.map(tx => {
-    const txItems = items.filter(i => i.transaction_id === tx.id);
-    
-    return {
-      id: tx.id,
-      invoiceNo: tx.invoice_no,
-      type: tx.type as any,
-      date: tx.date,
-      timestamp: new Date(tx.date).getTime(),
-      
-      // Pemasukan
-      items: txItems.map(i => ({
-        productId: i.product_id,
-        sku: i.products?.sku || '',
-        productName: i.products?.name || '',
-        quantity: i.quantity,
-        costPrice: i.cost_price,
-        sellingPrice: i.selling_price,
-        subtotalCost: i.subtotal_cost,
-        subtotalSelling: i.subtotal_selling
-      })),
-      totalCostPrice: tx.total_cost_price,
-      totalSellingPrice: tx.total_selling_price,
-      discount: tx.discount,
-      netRevenue: tx.net_revenue,
-      grossProfit: tx.gross_profit,
-      paymentMethod: tx.payment_method as any,
-      buyerName: tx.buyer_name,
-      
-      // Pengeluaran
-      expenseCategory: tx.expense_category as any,
-      amount: tx.amount,
-      description: tx.description,
-      notes: tx.notes
-    };
+const saveLocalData = (key: string, data: any) => {
+  try {
+    localStorage.setItem(key, JSON.stringify(data));
+  } catch (error) {
+    console.error('Error saving local data:', error);
+  }
+};
+
+export const fetchProducts = async (): Promise<ProductItem[]> => {
+  return new Promise((resolve) => {
+    setTimeout(() => {
+      resolve(getLocalData(PRODUCTS_KEY, INITIAL_PRODUCTS));
+    }, 300); // Simulate network delay
   });
 };
 
+export const fetchTransactions = async (): Promise<Transaction[]> => {
+  return new Promise((resolve) => {
+    setTimeout(() => {
+      resolve(getLocalData(TRANSACTIONS_KEY, INITIAL_TRANSACTIONS));
+    }, 300);
+  });
+};
+
+const generateId = () => Math.random().toString(36).substr(2, 9) + Date.now().toString(36);
+
 export const addProduct = async (product: Omit<ProductItem, 'id' | 'createdAt'>): Promise<ProductItem> => {
-  const { data, error } = await supabase.from('products').insert({
-    sku: product.sku,
-    name: product.name,
-    category: product.category,
-    cost_price: product.costPrice,
-    selling_price: product.sellingPrice,
-    stock: product.stock,
-    min_stock_alert: product.minStockAlert,
-    variation: product.variation,
-    size: product.size,
-    description: product.description
-  }).select().single();
-  
-  if (error) throw error;
-  
-  return {
-    id: data.id,
-    sku: data.sku,
-    name: data.name,
-    category: data.category as any,
-    costPrice: data.cost_price,
-    sellingPrice: data.selling_price,
-    stock: data.stock,
-    minStockAlert: data.min_stock_alert,
-    variation: data.variation,
-    size: data.size,
-    description: data.description,
-    createdAt: data.created_at
+  const newProduct: ProductItem = {
+    ...product,
+    id: generateId(),
+    createdAt: new Date().toISOString()
   };
+  
+  const current = getLocalData<ProductItem[]>(PRODUCTS_KEY, INITIAL_PRODUCTS);
+  saveLocalData(PRODUCTS_KEY, [newProduct, ...current]);
+  
+  return newProduct;
 };
 
 export const updateProduct = async (product: ProductItem): Promise<void> => {
-  const { error } = await supabase.from('products').update({
-    sku: product.sku,
-    name: product.name,
-    category: product.category,
-    cost_price: product.costPrice,
-    selling_price: product.sellingPrice,
-    stock: product.stock,
-    min_stock_alert: product.minStockAlert,
-    variation: product.variation,
-    size: product.size,
-    description: product.description
-  }).eq('id', product.id);
-  
-  if (error) throw error;
+  const current = getLocalData<ProductItem[]>(PRODUCTS_KEY, INITIAL_PRODUCTS);
+  const updated = current.map(p => p.id === product.id ? product : p);
+  saveLocalData(PRODUCTS_KEY, updated);
 };
 
 export const deleteProduct = async (id: string): Promise<void> => {
-  const { error } = await supabase.from('products').delete().eq('id', id);
-  if (error) throw error;
+  const current = getLocalData<ProductItem[]>(PRODUCTS_KEY, INITIAL_PRODUCTS);
+  const updated = current.filter(p => p.id !== id);
+  saveLocalData(PRODUCTS_KEY, updated);
 };
 
 export const addTransaction = async (tx: Omit<Transaction, 'id'>): Promise<Transaction> => {
-  const { data: insertedTx, error } = await supabase.from('transactions').insert({
-    invoice_no: tx.invoiceNo,
-    type: tx.type,
-    date: tx.date,
-    total_cost_price: tx.totalCostPrice,
-    total_selling_price: tx.totalSellingPrice,
-    discount: tx.discount,
-    net_revenue: tx.netRevenue,
-    gross_profit: tx.grossProfit,
-    payment_method: tx.paymentMethod,
-    buyer_name: tx.buyerName,
-    expense_category: tx.expenseCategory,
-    amount: tx.amount,
-    description: tx.description,
-    notes: tx.notes
-  }).select().single();
-  
-  if (error) throw error;
-  
-  if (tx.items && tx.items.length > 0) {
-    const itemsToInsert = tx.items.map(item => ({
-      transaction_id: insertedTx.id,
-      product_id: item.productId,
-      quantity: item.quantity,
-      cost_price: item.costPrice,
-      selling_price: item.sellingPrice,
-      subtotal_cost: item.subtotalCost,
-      subtotal_selling: item.subtotalSelling
-    }));
-    
-    const { error: itemsError } = await supabase.from('transaction_items').insert(itemsToInsert);
-    if (itemsError) throw itemsError;
-  }
-  
-  return {
+  const newTx: Transaction = {
     ...tx,
-    id: insertedTx.id,
-    timestamp: new Date(insertedTx.date).getTime()
+    id: generateId(),
+    timestamp: new Date(tx.date).getTime()
   };
+  
+  const current = getLocalData<Transaction[]>(TRANSACTIONS_KEY, INITIAL_TRANSACTIONS);
+  saveLocalData(TRANSACTIONS_KEY, [newTx, ...current]);
+  
+  
+  
+  return newTx;
 };
 
-
 export const updateTransaction = async (id: string, updates: Partial<Transaction>): Promise<void> => {
-  const dbUpdates: any = {};
-  if (updates.buyerName !== undefined) dbUpdates.buyer_name = updates.buyerName;
-  if (updates.paymentMethod !== undefined) dbUpdates.payment_method = updates.paymentMethod;
-  if (updates.discount !== undefined) dbUpdates.discount = updates.discount;
-  if (updates.netRevenue !== undefined) dbUpdates.net_revenue = updates.netRevenue;
-  if (updates.grossProfit !== undefined) dbUpdates.gross_profit = updates.grossProfit;
-  
-  if (updates.expenseCategory !== undefined) dbUpdates.expense_category = updates.expenseCategory;
-  if (updates.amount !== undefined) dbUpdates.amount = updates.amount;
-  if (updates.description !== undefined) dbUpdates.description = updates.description;
-  if (updates.notes !== undefined) dbUpdates.notes = updates.notes;
-  if (updates.date !== undefined) dbUpdates.date = updates.date;
-
-  if (Object.keys(dbUpdates).length === 0) return;
-
-  const { error } = await supabase.from('transactions').update(dbUpdates).eq('id', id);
-  if (error) throw error;
+  const current = getLocalData<Transaction[]>(TRANSACTIONS_KEY, INITIAL_TRANSACTIONS);
+  const updated = current.map(tx => tx.id === id ? { ...tx, ...updates } : tx);
+  saveLocalData(TRANSACTIONS_KEY, updated);
 };
 
 export const deleteTransaction = async (id: string): Promise<void> => {
-  const { error } = await supabase.from('transactions').delete().eq('id', id);
-  if (error) throw error;
+  const current = getLocalData<Transaction[]>(TRANSACTIONS_KEY, INITIAL_TRANSACTIONS);
+  const updated = current.filter(tx => tx.id !== id);
+  saveLocalData(TRANSACTIONS_KEY, updated);
 };
 
 export const clearTransactions = async (): Promise<void> => {
-  const { error } = await supabase.from('transactions').delete().neq('id', '00000000-0000-0000-0000-000000000000');
-  if (error) throw error;
+  saveLocalData(TRANSACTIONS_KEY, []);
 };
 
 export const clearProducts = async (): Promise<void> => {
-  const { error } = await supabase.from('products').delete().neq('id', '00000000-0000-0000-0000-000000000000');
-  if (error) throw error;
+  saveLocalData(PRODUCTS_KEY, []);
 };

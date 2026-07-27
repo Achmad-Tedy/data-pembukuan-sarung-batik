@@ -60,6 +60,16 @@ export default function App() {
   const [loginError, setLoginError] = useState<string>('');
 
   
+  
+  useEffect(() => {
+    const link = document.querySelector("link[rel*='icon']") as HTMLLinkElement || document.createElement('link');
+    link.type = 'image/x-icon';
+    link.rel = 'shortcut icon';
+    link.href = logoUrl;
+    document.getElementsByTagName('head')[0].appendChild(link);
+    document.title = appName;
+  }, [logoUrl, appName]);
+
   const handleSaveSettings = (newAppName: string, newLogoUrl: string, newThemeColor: string) => {
     setAppName(newAppName);
     setLogoUrl(newLogoUrl);
@@ -575,9 +585,13 @@ export default function App() {
       />
 
       {/* Modal 3: Printable Receipt */}
+      {/* Modal 3: Printable Receipt */}
       <ReceiptModal
         transaction={selectedReceiptTx}
         onClose={() => setSelectedReceiptTx(null)}
+        appName={appName}
+        logoUrl={logoUrl}
+        cashierName={userRole === 'admin' ? 'Bos' : 'Kasir'}
       />
 
     </div>

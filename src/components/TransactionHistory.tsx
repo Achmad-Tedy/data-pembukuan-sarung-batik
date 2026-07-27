@@ -281,15 +281,13 @@ export const TransactionHistory: React.FC<TransactionHistoryProps> = ({
                           >
                             <Edit className="w-4 h-4" />
                           </button>
-                          {isPemasukan && (
-                            <button
-                              onClick={() => onSelectReceipt(tx)}
-                              title="Cetak Nota / Struk"
-                              className="p-1.5 text-emerald-600 hover:text-emerald-800 hover:bg-emerald-400/20 rounded-lg cursor-pointer"
-                            >
-                              <Printer className="w-4 h-4" />
-                            </button>
-                          )}
+                          <button
+    onClick={() => onSelectReceipt(tx)}
+    title="Cetak Nota / Struk"
+    className="p-1.5 text-emerald-600 hover:text-emerald-800 hover:bg-emerald-400/20 rounded-lg cursor-pointer"
+  >
+    <Printer className="w-4 h-4" />
+  </button>
 
                           {/* Delete Transaction */}
                           <button

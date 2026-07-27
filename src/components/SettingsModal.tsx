@@ -41,6 +41,22 @@ export const SettingsModal: React.FC<SettingsModalProps> = ({
     }
   };
 
+  
+  const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (file) {
+      if (file.size > 2 * 1024 * 1024) {
+        alert('Ukuran gambar maksimal 2MB');
+        return;
+      }
+      const reader = new FileReader();
+      reader.onloadend = () => {
+        setLogoUrl(reader.result as string);
+      };
+      reader.readAsDataURL(file);
+    }
+  };
+
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
     onSave(appName, logoUrl, themeColor);
@@ -78,14 +94,25 @@ export const SettingsModal: React.FC<SettingsModalProps> = ({
               <ImageIcon className="w-4 h-4" />
               <span>URL Logo (Link Gambar)</span>
             </label>
-            <input
-              type="text"
-              required
-              value={logoUrl}
-              onChange={(e) => setLogoUrl(e.target.value)}
-              className="w-full px-3 py-2 rounded-xl bg-slate-900 border border-slate-600 text-slate-100 focus:border-blue-500 focus:ring-1 focus:ring-blue-500 transition-all"
-              placeholder="https://..."
-            />
+            
+            <div className="flex flex-col space-y-2">
+              <label className="flex items-center justify-center w-full px-4 py-2 bg-slate-800 border border-slate-600 border-dashed rounded-xl cursor-pointer hover:bg-slate-700 transition-colors">
+                <span className="text-sm text-slate-300">Pilih file gambar dari komputer...</span>
+                <input type="file" accept="image/*" className="hidden" onChange={handleFileChange} />
+              </label>
+              <div className="flex items-center space-x-2">
+                <span className="text-xs text-slate-500 w-full text-center">Atau masukkan link gambar di bawah:</span>
+              </div>
+              <input
+                type="text"
+                required
+                value={logoUrl}
+                onChange={(e) => setLogoUrl(e.target.value)}
+                className="w-full px-3 py-2 rounded-xl bg-slate-900 border border-slate-600 text-slate-100 focus:border-blue-500 focus:ring-1 focus:ring-blue-500 transition-all"
+                placeholder="https://..."
+              />
+            </div>
+
             {logoUrl && (
               <div className="mt-2 flex justify-center p-2 bg-slate-900 rounded-lg border border-slate-700">
                 <img src={logoUrl} alt="Preview Logo" className="h-12 w-auto object-contain rounded" onError={(e) => {
